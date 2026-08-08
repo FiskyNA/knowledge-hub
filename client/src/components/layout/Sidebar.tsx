@@ -1,4 +1,4 @@
-import { LayoutDashboard, Sun, Moon, X, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Sun, Moon, X, BookOpen, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/components/layout/ThemeProvider'
 import { NavLink } from 'react-router-dom'
@@ -45,8 +45,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         <nav className="flex-1 p-3 space-y-0.5">
           <NavLink
-            to="/"
-            end
+            to="/dashboard"
             onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -58,6 +57,21 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           >
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/favorites"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white'
+              }`
+            }
+          >
+            <Star className="h-4 w-4" />
+            Favorites
           </NavLink>
         </nav>
 

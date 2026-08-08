@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, File, Image, FileText, FileCode } from 'lucide-react'
+import { Upload, X, File, Image, FileText, FileCode, CheckCircle, AlertCircle } from 'lucide-react'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
@@ -38,6 +38,7 @@ export function FileUploadDialog({ open, onOpenChange, chapterId }: FileUploadDi
   const uploadFile = useUploadFile()
   const [files, setFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prev) => [...prev, ...acceptedFiles])
@@ -47,6 +48,9 @@ export function FileUploadDialog({ open, onOpenChange, chapterId }: FileUploadDi
 
   const handleUpload = async () => {
     if (files.length === 0) return
+
+    let successCount = 0
+    let failCount = 0
 
     for (const file of files) {
       const formData = new FormData()
@@ -60,18 +64,30 @@ export function FileUploadDialog({ open, onOpenChange, chapterId }: FileUploadDi
             setUploadProgress((prev) => ({ ...prev, [file.name]: percent }))
           },
         })
+        successCount++
         setUploadProgress((prev) => {
           const n = { ...prev }
           delete n[file.name]
           return n
         })
       } catch (err) {
+        failCount++
         console.error('Upload failed:', err)
       }
     }
 
     setFiles([])
     onOpenChange(false)
+
+    if (failCount === 0) {
+      setToast({ type: 'success', message: `${successCount} file(s) uploaded successfully` })
+    } else if (successCount === 0) {
+      setToast({ type: 'error', message: `Failed to upload ${failCount} file(s)` })
+    } else {
+      setToast({ type: 'success', message: `${successCount} uploaded, ${failCount} failed` })
+    }
+
+    setTimeout(() => setToast(null), 3000)
   }
 
   const removeFile = (file: File) => {
@@ -79,82 +95,103 @@ export function FileUploadDialog({ open, onOpenChange, chapterId }: FileUploadDi
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader className="px-5 pt-5 pb-0">
-          <DialogTitle>Upload Files</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="px-5 pt-5 pb-0">
+            <DialogTitle>Upload Files</DialogTitle>
+          </DialogHeader>
 
-        <div className="px-5 pb-5 space-y-4">
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-              isDragActive
-                ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/10'
-                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
-            }`}
-          >
-            <input {...getInputProps()} />
-            <Upload className={`h-10 w-10 mx-auto mb-3 ${isDragActive ? 'text-blue-500' : 'text-gray-400'}`} />
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
-              {isDragActive ? 'Drop files here...' : 'Click or drag files to upload'}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              PDF, images, documents, code — max 10MB each
-            </p>
-          </div>
-
-          {files.length > 0 && (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {files.map((file) => {
-                const { icon } = getFileInfo(file)
-                const progress = uploadProgress[file.name]
-                const size = (file.size / 1024).toFixed(1)
-
-                return (
-                  <div key={file.name} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg px-3 py-2.5">
-                    <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center shrink-0">
-                      {icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{file.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{size} KB</p>
-                      {progress !== undefined && (
-                        <div className="mt-1.5 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 rounded-full transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => removeFile(file)}
-                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleUpload}
-              disabled={files.length === 0 || uploadFile.isPending}
+          <div className="px-5 pb-5 space-y-4">
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                isDragActive
+                  ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/10'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
+              }`}
             >
-              <Upload className="h-4 w-4 mr-1.5" />
-              {uploadFile.isPending ? 'Uploading...' : `Upload ${files.length} file(s)`}
-            </Button>
+              <input {...getInputProps()} />
+              <Upload className={`h-10 w-10 mx-auto mb-3 ${isDragActive ? 'text-blue-500' : 'text-gray-400'}`} />
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {isDragActive ? 'Drop files here...' : 'Click or drag files to upload'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                PDF, images, documents, code — max 100MB each
+              </p>
+            </div>
+
+            {files.length > 0 && (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {files.map((file) => {
+                  const { icon } = getFileInfo(file)
+                  const progress = uploadProgress[file.name]
+                  const size = file.size >= 1048576
+                    ? `${(file.size / 1048576).toFixed(1)} MB`
+                    : `${(file.size / 1024).toFixed(1)} KB`
+
+                  return (
+                    <div key={file.name} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg px-3 py-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center shrink-0">
+                        {icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{file.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{size}</p>
+                        {progress !== undefined && (
+                          <div className="mt-1.5 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-blue-500 rounded-full transition-all"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => removeFile(file)}
+                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleUpload}
+                disabled={files.length === 0 || uploadFile.isPending}
+              >
+                <Upload className="h-4 w-4 mr-1.5" />
+                {uploadFile.isPending ? 'Uploading...' : `Upload ${files.length} file(s)`}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-300'
+              : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700/50 text-red-700 dark:text-red-300'
+          }`}>
+            {toast.type === 'success'
+              ? <CheckCircle className="h-4 w-4 shrink-0" />
+              : <AlertCircle className="h-4 w-4 shrink-0" />
+            }
+            <span className="text-sm font-medium">{toast.message}</span>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   )
 }

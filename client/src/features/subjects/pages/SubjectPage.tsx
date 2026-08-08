@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, BookOpen, ChevronRight } from 'lucide-react'
+import { ChevronRight, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSubject, useChapters } from '@/hooks/useData'
 
@@ -50,13 +50,13 @@ export function SubjectPage() {
 
   return (
     <div className="space-y-6 py-2">
-      <button
-        onClick={() => navigate('/')}
-        className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        All Subjects
-      </button>
+      <nav className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+        <button onClick={() => navigate('/')} className="hover:text-gray-900 dark:hover:text-white transition-colors">
+          Subjects
+        </button>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <span className="text-gray-900 dark:text-white font-medium">{subject.name}</span>
+      </nav>
 
       <div className="flex items-center gap-4">
         <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${style.bg} flex items-center justify-center text-2xl shrink-0 shadow-md`}>
@@ -95,6 +95,11 @@ export function SubjectPage() {
                 <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-1">
                   {chapter.name}
                 </span>
+                {chapter._count && chapter._count.files > 0 && (
+                  <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full shrink-0">
+                    {chapter._count.files} {chapter._count.files === 1 ? 'file' : 'files'}
+                  </span>
+                )}
                 <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors shrink-0" />
               </button>
             ))}

@@ -32,7 +32,7 @@ router.get(
     const chapters = await client.chapter.findMany({
       where,
       orderBy: { order: 'asc' },
-      include: { notes: true, files: true },
+      include: { _count: { select: { files: true } } },
     })
     res.json(chapters)
   })

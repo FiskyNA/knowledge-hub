@@ -2,6 +2,40 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import type { Subject, Chapter, Note, File as FileInfo } from '@/types'
 
+export interface Stats {
+  subjects: number
+  chapters: number
+  files: number
+  totalSize: number
+}
+
+export const useStats = () => {
+  return useQuery({
+    queryKey: ['stats'],
+    queryFn: async () => {
+      const { data } = await api.get<Stats>('/stats')
+      return data
+    },
+  })
+}
+
+export interface SearchResult {
+  subjects: { id: string; name: string; description: string | null }[]
+  chapters: { id: string; name: string; subjectId: string; subject: { name: string } }[]
+  files: { id: string; originalName: string; size: number; chapterId: string | null; chapter: { name: string; subjectId: string; subject: { name: string } } | null }[]
+}
+
+export const useSearch = (query: string) => {
+  return useQuery({
+    queryKey: ['search', query],
+    queryFn: async () => {
+      const { data } = await api.get<SearchResult>('/search', { params: { q: query } })
+      return data
+    },
+    enabled: query.trim().length > 0,
+  })
+}
+
 export const useSubjects = () => {
   return useQuery({
     queryKey: ['subjects'],
@@ -172,6 +206,24 @@ export const useFiles = (chapterId?: string) => {
     queryFn: async () => {
       const url = chapterId ? `/files?chapterId=${chapterId}` : '/files'
       const { data } = await api.get<FileInfo[]>(url)
+      return data
+    },
+  })
+}
+
+export interface FavoriteFile extends FileInfo {
+  chapter: {
+    id: string
+    name: string
+    subject: { id: string; name: string }
+  } | null
+}
+
+export const useFavorites = () => {
+  return useQuery({
+    queryKey: ['favorites'],
+    queryFn: async () => {
+      const { data } = await api.get<FavoriteFile[]>('/files/favorites')
       return data
     },
   })

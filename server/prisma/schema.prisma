@@ -73,6 +73,7 @@ model File {
   mimeType     String
   size         Int
   extension    String
+  isFavorite   Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

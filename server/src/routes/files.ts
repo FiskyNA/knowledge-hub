@@ -26,6 +26,18 @@ router.get(
 )
 
 router.get(
+  '/favorites',
+  asyncHandler(async (req: Request, res: Response) => {
+    const files = await client.file.findMany({
+      where: { userId: PUBLIC_USER_ID, isFavorite: true },
+      orderBy: { updatedAt: 'desc' },
+      include: { chapter: { select: { id: true, name: true, subject: { select: { id: true, name: true } } } } },
+    })
+    res.json(files)
+  })
+)
+
+router.get(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
@@ -101,6 +113,28 @@ router.patch(
     const updated = await client.file.update({
       where: { id, userId: PUBLIC_USER_ID },
       data: { originalName },
+    })
+
+    res.json(updated)
+  })
+)
+
+router.patch(
+  '/:id/favorite',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    const file = await client.file.findUnique({
+      where: { id, userId: PUBLIC_USER_ID },
+    })
+
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' })
+    }
+
+    const updated = await client.file.update({
+      where: { id, userId: PUBLIC_USER_ID },
+      data: { isFavorite: !file.isFavorite },
     })
 
     res.json(updated)

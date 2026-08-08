@@ -6,8 +6,10 @@ import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { QueryProvider } from '@/components/layout/QueryProvider'
 
 import { LandingPage } from '@/features/subjects/pages/LandingPage'
+import { DashboardPage } from '@/features/subjects/pages/DashboardPage'
 import { SubjectPage } from '@/features/subjects/pages/SubjectPage'
 import { ChapterPage } from '@/features/chapters/pages/ChapterPage'
+import { FavoritesPage } from '@/features/subjects/pages/FavoritesPage'
 import { NotePage } from '@/features/notes/pages/NotePage'
 import { FilePage } from '@/features/files/pages/FilePage'
 
@@ -17,6 +19,8 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <LandingPage /> },
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'favorites', element: <FavoritesPage /> },
       { path: 'subjects/:subjectId', element: <SubjectPage /> },
       { path: 'subjects/:subjectId/chapters/:chapterId', element: <ChapterPage /> },
       { path: 'notes/:noteId', element: <NotePage /> },

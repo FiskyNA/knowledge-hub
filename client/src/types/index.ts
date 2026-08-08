@@ -29,6 +29,7 @@ export interface Chapter {
   subjectId: string
   notes?: Note[]
   files?: File[]
+  _count?: { files: number }
 }
 
 export interface File {
@@ -39,6 +40,7 @@ export interface File {
   mimeType: string
   size: number
   extension: string
+  isFavorite: boolean
   createdAt: string
   updatedAt: string
   chapterId?: string | null
