@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": false,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/index.css",
+    "baseColor": "slate"
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui"
+  },
+  "componentName": "ui",
+  "files": {
+    ".gitignore": true,
+    "components.json": true,
+    "tsconfig.json": true,
+    "vite.config.ts": true,
+    "tailwind.config.js": true,
+    "postcss.config.js": true
+  }
+}

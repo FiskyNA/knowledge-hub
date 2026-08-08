@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  name      String?
+  role      String     @default("USER")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  subjects   Subject[]
+  fileTags   FileTag[]
+  noteTags   NoteTag[]
+  sessions   Session[]
+  files      File[]
+  notes      Note[]
+}
+
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+}
+
+model Subject {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  color       String    @default("#6366F1")
+  icon        String?
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  chapters Chapter[]
+}
+
+model Chapter {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId String
+
+  notes Note[]
+  files File[]
+}
+
+model File {
+  id           String    @id @default(uuid())
+  name         String
+  originalName String
+  path         String
+  mimeType     String
+  size         Int
+  extension    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Optional owner (for files not tied to a chapter)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  // Optional chapter attachment
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  chapterId String?
+
+  // One-to-one: File can optionally belong to a Note
+  note   Note?  @relation(name: "NoteFile", fields: [noteId], references: [id], onDelete: SetNull)
+  noteId String? @unique
+
+  // Many-to-many: tags
+  tags FileTag[] @relation("FileTags")
+}
+
+model FileTag {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#6B7280")
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  files File[] @relation("FileTags")
+}
+
+model Note {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  slug        String?  @unique
+  excerpt     String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  chapterId String?
+
+  file   File?  @relation(name: "NoteFile")
+  fileId String?
+
+  noteTags NoteTag[] @relation("NoteTags")
+}
+
+model NoteTag {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#6B7280")
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  notes Note[] @relation("NoteTags")
+}
