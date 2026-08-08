@@ -252,6 +252,16 @@ app.post(
   asyncHandler(handleFileUpload)
 )
 
+const clientDist = path.join(__dirname, '../../client/dist')
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist))
+  app.get('*', (req: Request, res: Response) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(clientDist, 'index.html'))
+    }
+  })
+}
+
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 4000
