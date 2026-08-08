@@ -37,7 +37,7 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-app.post('/api/seed', asyncHandler(async (req: Request, res: Response) => {
+app.get('/api/seed', asyncHandler(async (req: Request, res: Response) => {
   const existing = await client.subject.count({ where: { userId: PUBLIC_USER_ID } })
   if (existing > 0) {
     return res.json({ message: 'Already seeded', subjects: existing })
