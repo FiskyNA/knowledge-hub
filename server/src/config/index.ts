@@ -2,6 +2,11 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'fallback-secret-change-in-prod',
   uploadDir: process.env.UPLOAD_DIR || './uploads',
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '52428800', 10),
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+    apiKey: process.env.CLOUDINARY_API_KEY || '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+  },
   allowedMimeTypes: [
     'application/pdf',
     'application/msword',

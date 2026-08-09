@@ -67,6 +67,10 @@ router.get(
       return res.status(404).json({ message: 'File not found' })
     }
 
+    if (file.path.startsWith('http')) {
+      return res.redirect(file.path)
+    }
+
     const filePath = path.join(process.env.UPLOAD_DIR || './uploads', file.path)
     res.download(filePath, file.originalName)
   })
@@ -83,6 +87,10 @@ router.get(
 
     if (!file) {
       return res.status(404).json({ message: 'File not found' })
+    }
+
+    if (file.path.startsWith('http')) {
+      return res.redirect(file.path)
     }
 
     const filePath = path.resolve(process.env.UPLOAD_DIR || './uploads', file.path)
@@ -154,11 +162,13 @@ router.delete(
       return res.status(404).json({ message: 'File not found' })
     }
 
-    const filePath = path.join(process.env.UPLOAD_DIR || './uploads', file.path)
-    try {
-      await fs.unlink(filePath)
-    } catch (err) {
-      console.warn('File not found on disk:', filePath)
+    if (!file.path.startsWith('http')) {
+      const filePath = path.join(process.env.UPLOAD_DIR || './uploads', file.path)
+      try {
+        await fs.unlink(filePath)
+      } catch (err) {
+        console.warn('File not found on disk:', filePath)
+      }
     }
 
     await client.file.delete({ where: { id, userId: PUBLIC_USER_ID } })
