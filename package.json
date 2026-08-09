@@ -2,8 +2,7 @@
   "name": "knowledge-hub",
   "private": true,
   "scripts": {
-    "build": "cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate",
-    "start": "cd server && npx ts-node src/index.ts",
-    "seed": "curl -X GET http://localhost:4000/api/seed"
+    "build": "cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate && npx prisma db push",
+    "start": "cd server && npx ts-node src/index.ts"
   }
 }

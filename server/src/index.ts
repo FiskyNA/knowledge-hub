@@ -252,7 +252,8 @@ app.post(
   asyncHandler(handleFileUpload)
 )
 
-const clientDist = path.join(__dirname, '../../client/dist')
+const clientDist = path.join(process.cwd(), '..', 'client', 'dist')
+console.log('Serving client from:', clientDist, 'exists:', fs.existsSync(clientDist))
 if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist))
   app.get('*', (req: Request, res: Response) => {
